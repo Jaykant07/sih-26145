@@ -1,0 +1,26 @@
+{
+  "experiment_id": "DGA-002",
+  "traffic_class": "dga",
+  "attack_type": "dga_like_dns_queries",
+  "generator": "custom_python_scapy",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "destination_port": 53531,
+  "protocol": "UDP",
+  "base_domain": "lab.local",
+  "requested_queries": 100,
+  "captured_packets": 100,
+  "kernel_dropped_packets": 0,
+  "label_generation": "random_alphanumeric",
+  "label_length_range": [8, 14],
+  "query_interval_seconds": {
+    "minimum": 0.15,
+    "maximum": 0.50
+  },
+  "timing_profile": "irregular",
+  "zeek_dns_records": 100,
+  "ground_truth": true,
+  "label": "malicious",
+  "canonical": true,
+  "notes": "Controlled DGA-like DNS traffic generated in an isolated lab. No malware was executed. DGA-002 uses shorter random-looking labels and irregular inter-query timing to provide a distinct DGA traffic profile from DGA-001. DNS analyzer registered for UDP/53531."
+}

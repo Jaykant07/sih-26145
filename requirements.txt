@@ -1,0 +1,8 @@
+# Core dependencies — pinned for reproducibility
+pytest>=8.0
+pyyaml>=6.0
+aiofiles>=24.0
+scikit-learn>=1.5
+streamlit>=1.35
+jsonschema>=4.19
+requests>=2.31.0

@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Data — PCAPs can be large; keep manifests, not raw captures
+data/pcap/*.pcap
+data/pcap/*.pcapng
+
+# Models — binary artifacts
+data/models/*.pkl
+data/models/*.joblib
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Benchmarks raw output
+benchmarks/raw/
+
+# Artifacts (generated)
+artifacts/
+
+# Zeek logs (generated during replay)
+zeek_logs/
+
+# Large network captures
+*.pcap
+*.pcapng
+
+# Large generated logs
+*.log
+
+# Generated Zeek/RITA artifacts
+rita/test_data/
+artifacts/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS/editor
+.DS_Store
+.vscode/

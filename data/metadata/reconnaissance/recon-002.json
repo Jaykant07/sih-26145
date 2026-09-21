@@ -1,0 +1,45 @@
+{
+  "experiment_id": "RECON-002",
+  "traffic_class": "reconnaissance",
+  "attack_type": "targeted_tcp_syn_port_scan",
+  "generator": "nmap",
+  "generator_version": "7.95",
+  "scan_type": "SYN",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "protocol": "TCP",
+  "target_ports": [
+    21,
+    22,
+    23,
+    25,
+    53,
+    80,
+    110,
+    135,
+    139,
+    143,
+    443,
+    445,
+    3389,
+    5900,
+    8080,
+    8443
+  ],
+  "requested_ports": 16,
+  "captured_packets": 33,
+  "kernel_dropped_packets": 0,
+  "zeek_connections": 16,
+  "unique_destination_ports": 16,
+  "zeek_conn_states": {
+    "REJ": 15,
+    "RSTO": 1
+  },
+  "open_ports_observed_by_nmap": [
+    22
+  ],
+  "ground_truth": true,
+  "label": "malicious",
+  "canonical": true,
+  "notes": "Controlled targeted TCP SYN reconnaissance scan from Kali against the isolated Ubuntu lab host. The scan targeted 16 commonly used service ports. Nmap reported TCP/22 as open and the remaining 15 ports as closed."
+}

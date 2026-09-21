@@ -1,0 +1,18 @@
+{
+  "experiment_id": "DDoS-001",
+  "traffic_class": "ddos",
+  "attack_type": "tcp_syn_flood",
+  "generator": "hping3",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "destination_port": 5201,
+  "protocol": "TCP",
+  "requested_packets": 10000,
+  "captured_syn_packets": 4536,
+  "zeek_connections": 4536,
+  "connection_state": "REJ",
+  "payload_bytes": 0,
+  "label": "malicious",
+  "ground_truth": true,
+  "canonical": true
+}

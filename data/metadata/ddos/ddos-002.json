@@ -1,0 +1,20 @@
+{
+  "experiment_id": "DDoS-002",
+  "traffic_class": "ddos",
+  "attack_type": "udp_flood",
+  "generator": "hping3",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "destination_port": 5201,
+  "protocol": "UDP",
+  "requested_packets": 5000,
+  "captured_packets": 5000,
+  "kernel_dropped_packets": 0,
+  "zeek_attack_flows": 4989,
+  "zeek_conn_state": "S0",
+  "pcap_duration_seconds": 45.1133,
+  "observed_average_pps": 110.854,
+  "label": "malicious",
+  "ground_truth": true,
+  "canonical": true
+}

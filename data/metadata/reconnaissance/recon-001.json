@@ -1,0 +1,30 @@
+{
+  "experiment_id": "RECON-001",
+  "traffic_class": "reconnaissance",
+  "attack_type": "tcp_syn_port_scan",
+  "generator": "nmap",
+  "generator_version": "7.95",
+  "scan_type": "SYN",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "protocol": "TCP",
+  "port_range": "1-1024",
+  "requested_ports": 1024,
+  "captured_packets": 2049,
+  "kernel_dropped_packets": 0,
+  "zeek_connections": 1024,
+  "unique_destination_ports": 1024,
+  "destination_port_min": 1,
+  "destination_port_max": 1024,
+  "zeek_conn_states": {
+    "REJ": 1023,
+    "RSTO": 1
+  },
+  "open_ports_observed_by_nmap": [
+    22
+  ],
+  "ground_truth": true,
+  "label": "malicious",
+  "canonical": true,
+  "notes": "Controlled TCP SYN reconnaissance scan from Kali against the isolated Ubuntu lab host. Nmap reported the target as up, with 1023 closed TCP ports and TCP/22 open. Zeek generated 1024 connection records covering destination ports 1-1024."
+}

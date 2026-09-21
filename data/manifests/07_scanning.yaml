@@ -1,0 +1,9 @@
+Scenario: 07_scanning
+Threat label: Recon/Port Scan
+PCAP path: data/pcap/scan_test.pcap
+Source/generation method: Synthetic, generated via Scapy (29 SYNs from 192.168.1.100 to 192.168.1.1-29 on port 80).
+Date: 2026-09-12
+Expected detector: Zeek Scan framework (policy/misc/scan.zeek) + Zeek Scan adapter (Phase 13)
+Expected evidence: Zeek notice.log containing note "Scan::Address_Scan" and src IP.
+Replay command: `zeek -r data/pcap/scan_test.pcap LogAscii::use_json=T misc/scan.zeek`
+Notes: The default scan.zeek from Zeek v4 was used since Zeek v7+ deprecated and removed the misc/scan module from the core package. Threshold is 25 failed connections.

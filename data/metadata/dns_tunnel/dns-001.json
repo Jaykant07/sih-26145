@@ -1,0 +1,20 @@
+{
+  "experiment_id": "DNS-001",
+  "traffic_class": "dns_tunnel",
+  "attack_type": "dnscat2_dns_tunnel",
+  "generator": "dnscat2",
+  "generator_version": "0.07",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "source_port": 50370,
+  "destination_port": 53531,
+  "protocol": "UDP",
+  "domain": "lab.local",
+  "captured_packets": 91,
+  "kernel_dropped_packets": 0,
+  "zeek_dns_records": 100,
+  "ground_truth": true,
+  "label": "malicious",
+  "canonical": true,
+  "notes": "Controlled dnscat2 DNS tunnelling experiment using non-standard UDP port 53531 because UDP/5353 was occupied by Avahi and UDP/53 was occupied by systemd-resolved. Zeek DNS analyzer was explicitly registered for UDP/53531."
+}

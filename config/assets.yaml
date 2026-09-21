@@ -1,0 +1,36 @@
+# PS-26145 Asset Criticality Configuration
+# LAB / DEMONSTRATION ASSET INVENTORY — NOT PRODUCTION DATA
+# Used exclusively for testing and evaluating OT-aware severity escalation.
+
+assets:
+  # Critical OT / Industrial Control System Assets
+  "192.168.56.10":
+    name: "PLC-01 Primary Substation Controller"
+    criticality: "critical"
+    zone: "OT-Cell-1"
+    purdue_level: 1
+
+  "192.168.56.100":
+    name: "HMI-01 Engineering Workstation"
+    criticality: "critical"
+    zone: "OT-Control-Room"
+    purdue_level: 2
+
+  "10.0.0.1":
+    name: "Lab Core Gateway / SCADA Master"
+    criticality: "critical"
+    zone: "OT-Supervisory"
+    purdue_level: 3
+
+  # Standard Corporate / Lab IT Assets
+  "192.168.56.102":
+    name: "Lab Testing Workstation"
+    criticality: "standard"
+    zone: "IT-Workstations"
+    purdue_level: 4
+
+  "10.0.0.50":
+    name: "Standard Lab Client"
+    criticality: "standard"
+    zone: "IT-Clients"
+    purdue_level: 4
