@@ -24,6 +24,7 @@ class ThreatClass:
     RECONNAISSANCE = "reconnaissance"
     TLS_ANOMALY = "tls_anomaly"
     EXFILTRATION = "exfiltration"
+    ANOMALOUS_BEHAVIOR = "anomalous_behavior"
 
 
 class Severity:

@@ -21,15 +21,6 @@ is_online, _, _ = check_db_status(db_path)
 
 st.markdown('<div class="soc-section-title">OT Asset Inventory</div>', unsafe_allow_html=True)
 
-st.markdown(
-    """<div style="background-color: #EAF2FF; border: 1px solid #93C5FD; border-radius: 4px; padding: 0.5rem 0.7rem; margin-bottom: 1rem; font-size: 0.78rem; color: #1E40AF;">
-        <strong>Lab Asset Inventory.</strong>
-        These assets are from config/assets.yaml and represent the controlled OT lab environment.
-        They do not represent production power-sector assets.
-    </div>""",
-    unsafe_allow_html=True,
-)
-
 if not is_online:
     st.warning("Alert database is unavailable. Asset alert counts cannot be calculated.")
 

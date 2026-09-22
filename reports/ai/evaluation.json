@@ -1,0 +1,110 @@
+{
+  "model_version": "isolation-forest-v1",
+  "calibration_baseline": {
+    "benign_min": -0.14018598253502312,
+    "benign_max": 0.29709690839478453
+  },
+  "confusion_matrix": {
+    "TP": 2379,
+    "FP": 1,
+    "TN": 1,
+    "FN": 8563
+  },
+  "metrics": {
+    "precision": 0.9996,
+    "recall": 0.2174,
+    "f1_score": 0.3572,
+    "false_positive_rate": 0.5
+  },
+  "sample_counts": {
+    "total_samples": 10944,
+    "attack_samples": 10942,
+    "benign_eval_samples": 2
+  },
+  "per_experiment": [
+    {
+      "experiment": "DDoS-001",
+      "ground_truth": "attack",
+      "total_flows": 4536,
+      "alerts_emitted": 1104,
+      "detection_rate": 0.2434
+    },
+    {
+      "experiment": "DDoS-002",
+      "ground_truth": "attack",
+      "total_flows": 5000,
+      "alerts_emitted": 0,
+      "detection_rate": 0.0
+    },
+    {
+      "experiment": "RECON-001",
+      "ground_truth": "attack",
+      "total_flows": 1024,
+      "alerts_emitted": 960,
+      "detection_rate": 0.9375
+    },
+    {
+      "experiment": "RECON-002",
+      "ground_truth": "attack",
+      "total_flows": 16,
+      "alerts_emitted": 16,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "DGA-001",
+      "ground_truth": "attack",
+      "total_flows": 1,
+      "alerts_emitted": 1,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "DGA-002",
+      "ground_truth": "attack",
+      "total_flows": 1,
+      "alerts_emitted": 1,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "DNS-001",
+      "ground_truth": "attack",
+      "total_flows": 1,
+      "alerts_emitted": 1,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "DNS-002",
+      "ground_truth": "attack",
+      "total_flows": 1,
+      "alerts_emitted": 1,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "ENC-002",
+      "ground_truth": "attack",
+      "total_flows": 1,
+      "alerts_emitted": 1,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "Exfil-Asymmetric",
+      "ground_truth": "attack",
+      "total_flows": 1,
+      "alerts_emitted": 1,
+      "detection_rate": 1.0
+    },
+    {
+      "experiment": "Beacon-Fixed",
+      "ground_truth": "attack",
+      "total_flows": 360,
+      "alerts_emitted": 293,
+      "detection_rate": 0.8139
+    },
+    {
+      "experiment": "BENIGN-001-Val",
+      "ground_truth": "benign",
+      "total_flows": 2,
+      "alerts_emitted": 1,
+      "detection_rate": 0.5
+    }
+  ]
+}

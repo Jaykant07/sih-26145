@@ -12,9 +12,10 @@ from typing import Any, Optional, Sequence
 import altair as alt
 import pandas as pd
 
-# Canonical specification for the 7 OT threat classes and their semantic colors:
+# Canonical specification for the 8 OT threat classes and their semantic colors:
 # DDoS: blue, Reconnaissance: purple, DGA / DNS: green, DNS Tunnelling: red,
-# C2 Beaconing: cyan/teal, Encrypted Malware / TLS: orange, Exfiltration: brown
+# C2 Beaconing: cyan/teal, Encrypted Malware / TLS: orange, Exfiltration: brown,
+# AI Behavioral Anomaly: indigo
 THREAT_SPECS: list[dict[str, str]] = [
     {"key": "ddos", "label": "DDoS", "color": "#2563EB"},
     {"key": "reconnaissance", "label": "Reconnaissance", "color": "#7C3AED"},
@@ -23,6 +24,7 @@ THREAT_SPECS: list[dict[str, str]] = [
     {"key": "beaconing", "label": "C2 Beaconing", "color": "#0D9488"},
     {"key": "tls_anomaly", "label": "Encrypted Malware / TLS", "color": "#D97706"},
     {"key": "exfiltration", "label": "Exfiltration", "color": "#92400E"},
+    {"key": "anomalous_behavior", "label": "AI Behavioral Anomaly", "color": "#6366F1"},
 ]
 
 # Aliases / normalizations to canonical threat keys
@@ -36,11 +38,13 @@ THREAT_NORM_MAP: dict[str, str] = {
     "beaconing": "beaconing",
     "tls_anomaly": "tls_anomaly",
     "exfiltration": "exfiltration",
+    "anomalous_behavior": "anomalous_behavior",
 }
 
 LABEL_TO_KEY_MAP: dict[str, str] = {spec["label"]: spec["key"] for spec in THREAT_SPECS}
 KEY_TO_LABEL_MAP: dict[str, str] = {spec["key"]: spec["label"] for spec in THREAT_SPECS}
 COLOR_MAP: dict[str, str] = {spec["label"]: spec["color"] for spec in THREAT_SPECS}
+
 
 
 def prepare_multi_threat_timeseries(
@@ -57,14 +61,6 @@ def prepare_multi_threat_timeseries(
     if not alerts:
         return pd.DataFrame(columns=["time_label", "time_iso", "threat_class", "alert_count"])
 
-    # Determine active threat classes based on optional filter
-    if selected_threat_labels:
-        active_specs = [s for s in THREAT_SPECS if s["label"] in selected_threat_labels]
-        if not active_specs:
-            active_specs = THREAT_SPECS
-    else:
-        active_specs = THREAT_SPECS
-
     parsed: list[tuple[datetime, str]] = []
     for a in alerts:
         try:
@@ -78,6 +74,16 @@ def prepare_multi_threat_timeseries(
 
     if not parsed:
         return pd.DataFrame(columns=["time_label", "time_iso", "threat_class", "alert_count"])
+
+    # Determine active threat classes based on optional filter or observed data
+    if selected_threat_labels:
+        active_specs = [s for s in THREAT_SPECS if s["label"] in selected_threat_labels]
+        if not active_specs:
+            active_specs = THREAT_SPECS
+    else:
+        parsed_keys = {k for _, k in parsed}
+        active_specs = [s for s in THREAT_SPECS if s["key"] in parsed_keys] or THREAT_SPECS
+
 
     min_dt = min(p[0] for p in parsed)
     max_dt = max(p[0] for p in parsed)

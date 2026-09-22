@@ -132,6 +132,38 @@ def seed_alerts() -> None:
             mitre_technique="T1071.004",
             action_recommended="block_domain",
         ),
+        # Behavioral Anomaly (Isolation Forest flow outlier)
+        create_draft_alert(
+            threat_class="anomalous_behavior",
+            severity="medium",
+            confidence=0.88,
+            source="192.168.56.102",
+            destination="192.168.56.254",
+            supporting_evidence={
+                "model_version": "isolation-forest-v1",
+                "raw_anomaly_score": 0.2452,
+                "normalized_confidence": 0.8804,
+                "benign_min": -0.1402,
+                "benign_max": 0.2971,
+                "proto": "tcp",
+                "conn_state": "SF",
+                "duration": 58.261,
+                "total_bytes": 20588,
+                "total_pkts": 31,
+                "byte_rate": 353.38,
+                "packet_rate": 0.53,
+                "byte_ratio": 4.54,
+            },
+            detector="ai_behavioral_anomaly",
+            flow_id="flow-ai-008",
+            timestamp=(base_time + timedelta(minutes=19)).isoformat(),
+            subtype="behavioral_outlier",
+
+            latency_class="event_driven",
+            mitre_technique="T1071",
+            action_recommended="investigate_endpoint",
+        ),
+
 
         # --- Incident 3: Encrypted Malware on HMI-01 (192.168.56.100, critical asset) ---
         create_draft_alert(

@@ -40,7 +40,8 @@
         "dga_dns",
         "dns_tunnel",
         "tls_anomaly",
-        "exfiltration"
+        "exfiltration",
+        "anomalous_behavior"
       ],
       "description": "Normalized threat classification"
     },

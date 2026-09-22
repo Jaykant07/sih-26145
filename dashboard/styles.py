@@ -248,6 +248,35 @@ footer {
     border: 1px solid #94A3B8;
 }
 
+/* ===== SHARED CARD STYLING (PROTOTYPE CARDS) ===== */
+.prototype-card,
+.kpi-card,
+.detector-card,
+.incident-card,
+.live-metric-card,
+.intel-card,
+.about-arch-item,
+[data-testid="stMetric"],
+[data-testid="stExpander"] {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.prototype-card:hover,
+.kpi-card:hover,
+.detector-card:hover,
+.incident-card:hover,
+.live-metric-card:hover,
+.intel-card:hover,
+.about-arch-item:hover,
+[data-testid="stMetric"]:hover,
+[data-testid="stExpander"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 14px rgba(0, 0, 0, 0.13);
+}
+
 /* ===== KPI CARDS ===== */
 .kpi-card {
     background-color: #FFFFFF;
@@ -546,10 +575,19 @@ footer {
     font-size: 0.82rem;
 }
 
+/* Metric cards (Analytics & OT Asset cards) */
+[data-testid="stMetric"] {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 4px;
+    padding: 0.6rem 0.8rem;
+}
+
 /* Compact expander */
 [data-testid="stExpander"] {
     border: 1px solid #E2E8F0;
     border-radius: 4px;
+    background-color: #FFFFFF;
 }
 </style>
 """

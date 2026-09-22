@@ -1,0 +1,98 @@
+{
+  "duration": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "orig_bytes": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "resp_bytes": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "orig_pkts": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "resp_pkts": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "orig_ip_bytes": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "resp_ip_bytes": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "total_bytes": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "total_pkts": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "byte_rate": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "packet_rate": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "byte_ratio": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "packet_ratio": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "missed_bytes": {
+    "type": "numeric",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "StandardScaler"
+  },
+  "proto": {
+    "type": "categorical",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "OneHotEncoder"
+  },
+  "conn_state": {
+    "type": "categorical",
+    "source": "features.flow_stats.extract_flow_features",
+    "required": true,
+    "transformation": "OneHotEncoder"
+  }
+}

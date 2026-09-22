@@ -456,3 +456,106 @@ def build_exfil_windows(
 
     return windows
 
+
+# ---------------------------------------------------------------------------
+# Per-Flow Canonical Feature Extraction (PS-26145 Shared Feature Layer)
+# ---------------------------------------------------------------------------
+
+@dataclass(frozen=True)
+class FlowRecordFeatures:
+    """Canonical behavioral flow features extracted from a single ConnRecord."""
+
+    duration: float
+    orig_bytes: int
+    resp_bytes: int
+    orig_pkts: int
+    resp_pkts: int
+    orig_ip_bytes: int
+    resp_ip_bytes: int
+    total_bytes: int
+    total_pkts: int
+    byte_rate: float
+    packet_rate: float
+    byte_ratio: float
+    packet_ratio: float
+    proto: str
+    conn_state: str
+    missed_bytes: int
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize features to dictionary."""
+        return {
+            "duration": self.duration,
+            "orig_bytes": self.orig_bytes,
+            "resp_bytes": self.resp_bytes,
+            "orig_pkts": self.orig_pkts,
+            "resp_pkts": self.resp_pkts,
+            "orig_ip_bytes": self.orig_ip_bytes,
+            "resp_ip_bytes": self.resp_ip_bytes,
+            "total_bytes": self.total_bytes,
+            "total_pkts": self.total_pkts,
+            "byte_rate": self.byte_rate,
+            "packet_rate": self.packet_rate,
+            "byte_ratio": self.byte_ratio,
+            "packet_ratio": self.packet_ratio,
+            "proto": self.proto,
+            "conn_state": self.conn_state,
+            "missed_bytes": self.missed_bytes,
+        }
+
+
+def extract_flow_features(record: ConnRecord) -> FlowRecordFeatures:
+    """
+    Extract canonical behavioral flow features from a single ConnRecord.
+
+    Reuses validated feature mathematics (rates, directional ratios, byte aggregations)
+    without leakage-prone identifiers (IPs, UIDs, timestamps, ports).
+    """
+    dur_raw = record.duration
+    duration = (
+        float(dur_raw)
+        if (dur_raw is not None and not math.isnan(dur_raw) and not math.isinf(dur_raw) and dur_raw > 0.0)
+        else 0.0
+    )
+
+    orig_b = int(record.orig_bytes or 0)
+    resp_b = int(record.resp_bytes or 0)
+    orig_p = int(record.orig_pkts or 0)
+    resp_p = int(record.resp_pkts or 0)
+    orig_ip_b = int(record.orig_ip_bytes or 0)
+    resp_ip_b = int(record.resp_ip_bytes or 0)
+
+    total_b = orig_ip_b + resp_ip_b
+    total_p = orig_p + resp_p
+
+    byte_rate = (total_b / max(duration, 0.001)) if duration > 0.0 else 0.0
+    packet_rate = (total_p / max(duration, 0.001)) if duration > 0.0 else 0.0
+
+    # Directional ratios (safe from ZeroDivisionError)
+    byte_ratio = float(orig_ip_b) / float(max(resp_ip_b, 1))
+    packet_ratio = float(orig_p) / float(max(resp_p, 1))
+
+    proto = str(record.proto or "unknown").lower()
+    conn_state = str(record.conn_state or "unknown").upper()
+    missed = int(record.missed_bytes or 0)
+
+    return FlowRecordFeatures(
+        duration=duration,
+        orig_bytes=orig_b,
+        resp_bytes=resp_b,
+        orig_pkts=orig_p,
+        resp_pkts=resp_p,
+        orig_ip_bytes=orig_ip_b,
+        resp_ip_bytes=resp_ip_b,
+        total_bytes=total_b,
+        total_pkts=total_p,
+        byte_rate=byte_rate,
+        packet_rate=packet_rate,
+        byte_ratio=byte_ratio,
+        packet_ratio=packet_ratio,
+        proto=proto,
+        conn_state=conn_state,
+        missed_bytes=missed,
+    )
+
+

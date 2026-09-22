@@ -278,3 +278,85 @@ class TestBuildFlowWindows:
         assert w_curr.flow_count == 1
         assert "10.0.0.3" in w_curr.source_ip_counts
 
+
+class TestExtractFlowFeatures:
+    """Unit tests for extract_flow_features in features.flow_stats."""
+
+    def test_extract_flow_features_normal(self) -> None:
+        from features.flow_stats import extract_flow_features
+
+        rec = _make_conn(
+            duration=2.0,
+            orig_bytes=1000,
+            resp_bytes=500,
+            orig_pkts=10,
+            resp_pkts=5,
+            orig_ip_bytes=1400,
+            resp_ip_bytes=700,
+            proto="tcp",
+            conn_state="SF",
+            missed_bytes=0,
+        )
+        feats = extract_flow_features(rec)
+        assert feats.duration == 2.0
+        assert feats.orig_bytes == 1000
+        assert feats.resp_bytes == 500
+        assert feats.orig_pkts == 10
+        assert feats.resp_pkts == 5
+        assert feats.total_bytes == 2100
+        assert feats.total_pkts == 15
+        assert feats.byte_rate == pytest.approx(1050.0)
+        assert feats.packet_rate == pytest.approx(7.5)
+        assert feats.byte_ratio == pytest.approx(1400.0 / 700.0)
+        assert feats.packet_ratio == pytest.approx(10.0 / 5.0)
+        assert feats.proto == "tcp"
+        assert feats.conn_state == "SF"
+        assert feats.missed_bytes == 0
+
+    def test_extract_flow_features_missing_optional(self) -> None:
+        from features.flow_stats import extract_flow_features
+
+        rec = _make_conn(
+            duration=None,
+            orig_bytes=None,
+            resp_bytes=None,
+            orig_pkts=1,
+            resp_pkts=0,
+            orig_ip_bytes=60,
+            resp_ip_bytes=0,
+        )
+        feats = extract_flow_features(rec)
+        assert feats.duration == 0.0
+        assert feats.orig_bytes == 0
+        assert feats.resp_bytes == 0
+        assert feats.byte_rate == 0.0
+        assert feats.packet_rate == 0.0
+        assert feats.byte_ratio == 60.0  # 60 / max(0, 1) = 60.0
+        assert feats.packet_ratio == 1.0  # 1 / max(0, 1) = 1.0
+
+    def test_extract_flow_features_nan_inf_duration(self) -> None:
+        from features.flow_stats import extract_flow_features
+
+        rec_nan = _make_conn(duration=float("nan"))
+        assert extract_flow_features(rec_nan).duration == 0.0
+
+        rec_inf = _make_conn(duration=float("inf"))
+        assert extract_flow_features(rec_inf).duration == 0.0
+
+        rec_neg = _make_conn(duration=-5.0)
+        assert extract_flow_features(rec_neg).duration == 0.0
+
+    def test_extract_flow_features_to_dict(self) -> None:
+        from features.flow_stats import extract_flow_features
+
+        rec = _make_conn()
+        d = extract_flow_features(rec).to_dict()
+        assert isinstance(d, dict)
+        assert "duration" in d
+        assert "total_bytes" in d
+        assert "byte_rate" in d
+        assert "packet_rate" in d
+        assert "proto" in d
+        assert "conn_state" in d
+
+

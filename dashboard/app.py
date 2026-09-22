@@ -21,7 +21,7 @@ import streamlit as st
 
 # Configure Streamlit page — must be first st command
 st.set_page_config(
-    page_title="SIH PS-26145 - OT Cyber Threat Console",
+    page_title="AKSHI - OT Cyber Threat Console",
     page_icon=":material/shield:",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -37,8 +37,8 @@ with st.sidebar:
     st.markdown(
         """
         <div class="sidebar-brand">
-            <div class="sidebar-brand-title">OT SECURITY</div>
-            <div class="sidebar-brand-subtitle">Cyber Threat Monitoring Console</div>
+            <div class="sidebar-brand-title">AKSHI</div>
+            <div class="sidebar-brand-subtitle">OT Cyber Threat Monitoring Console</div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -48,7 +48,7 @@ with st.sidebar:
 pages = {
     "OPERATIONS": [
         st.Page("pages/overview.py", title="Overview", icon=":material/dashboard:", default=True),
-        st.Page("pages/upload.py", title="PCAP Ingestion", icon=":material/upload_file:"),
+        st.Page("pages/upload.py", title="PCAP Analysis", icon=":material/upload_file:"),
         st.Page("pages/live_monitoring.py", title="Live Monitoring", icon=":material/monitor_heart:"),
         st.Page("pages/incidents.py", title="Incidents", icon=":material/warning:"),
     ],
@@ -58,7 +58,6 @@ pages = {
     ],
     "LAB": [
         st.Page("pages/demo_lab.py", title="Demo Lab", icon=":material/science:"),
-        st.Page("pages/asset_inventory.py", title="OT Asset Inventory", icon=":material/inventory:"),
     ],
     "SYSTEM": [
         st.Page("pages/about.py", title="About", icon=":material/info:"),

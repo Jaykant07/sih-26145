@@ -38,6 +38,7 @@ THREAT_CLASS_LABELS: dict[str, str] = {
     "beaconing": "C2 Beaconing",
     "tls_anomaly": "Encrypted Malware / TLS",
     "exfiltration": "Exfiltration",
+    "anomalous_behavior": "AI Behavioral Anomaly",
 }
 
 # Detector engine mapping
@@ -49,10 +50,24 @@ DETECTOR_ENGINES: dict[str, str] = {
     "rita_beacon_adapter": "RITA",
     "tls_detector": "JA3 + behavioral",
     "exfiltration_detector": "Custom detector",
+    "ai_behavioral_anomaly": "Isolation Forest",
+}
+
+# Canonical detector engine mapping for display
+DETECTOR_DISPLAY_ENGINES: dict[str, str] = {
+    "DDoS": "Custom detector",
+    "Reconnaissance": "Zeek Scan",
+    "DGA / DNS": "Random Forest",
+    "DNS Tunnelling": "RITA",
+    "C2 Beaconing": "RITA",
+    "Encrypted Malware / TLS": "JA3 + behavioral",
+    "Exfiltration": "Custom detector",
+    "AI Behavioral Anomaly": "Isolation Forest",
 }
 
 
 def _render_header(is_online: bool, status_msg: str, total_alerts: int) -> None:
+
     """Render top operational SOC header bar with perfect vertical alignment."""
     utc_now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     status_class = "status-live" if is_online else "status-offline"
@@ -62,9 +77,9 @@ def _render_header(is_online: bool, status_msg: str, total_alerts: int) -> None:
         f"""
         <div class="soc-header">
             <div style="display: flex; flex-direction: column; justify-content: center;">
-                <div class="soc-header-title">OT CYBER THREAT MONITORING CONSOLE</div>
+                <div class="soc-header-title">AKSHI &mdash; OT CYBER THREAT MONITORING CONSOLE</div>
                 <div class="soc-header-subtitle">
-                    SIH PS-26145 &mdash; Detection of Malware and Trojans in Software Used in the Power Sector
+                    AI-Based Detection of Cyber Threats in Unidirectional IP Traffic
                 </div>
             </div>
             <div class="soc-header-meta">
@@ -157,10 +172,11 @@ def _render_detector_coverage(detector_data: list[dict]) -> None:
             "engine": engine,
         }
 
-    # Ensure all 7 detectors are represented
+    # Ensure all 8 detectors are represented
+
     all_detectors = [
         "DDoS", "Reconnaissance", "DGA / DNS", "DNS Tunnelling",
-        "C2 Beaconing", "Encrypted Malware / TLS", "Exfiltration",
+        "C2 Beaconing", "Encrypted Malware / TLS", "Exfiltration", "AI Behavioral Anomaly",
     ]
 
     # Render in rows of 4
@@ -169,14 +185,18 @@ def _render_detector_coverage(detector_data: list[dict]) -> None:
 
     cols1 = st.columns(4)
     for i, det_name in enumerate(row1_detectors):
-        info = detector_info.get(det_name, {"alerts": 0, "incidents": 0, "engine": "N/A"})
+        fallback_engine = DETECTOR_DISPLAY_ENGINES.get(det_name, "Operational")
+        info = detector_info.get(det_name, {"alerts": 0, "incidents": 0, "engine": fallback_engine})
+        engine_str = info.get("engine") or fallback_engine
+        if engine_str == "N/A":
+            engine_str = fallback_engine
         with cols1[i]:
             st.markdown(
                 f"""<div class="detector-card">
                     <div class="detector-card-header">{det_name}</div>
                     <div class="detector-card-metric"><strong>{info['alerts']}</strong> alert{'s' if info['alerts'] != 1 else ''}</div>
                     <div class="detector-card-metric"><strong>{info['incidents']}</strong> incident{'s' if info['incidents'] != 1 else ''}</div>
-                    <div class="detector-card-metric">{info['engine']}</div>
+                    <div class="detector-card-metric">{engine_str}</div>
                     <div class="detector-card-status">Operational</div>
                 </div>""",
                 unsafe_allow_html=True,
@@ -184,18 +204,23 @@ def _render_detector_coverage(detector_data: list[dict]) -> None:
 
     cols2 = st.columns(4)
     for i, det_name in enumerate(row2_detectors):
-        info = detector_info.get(det_name, {"alerts": 0, "incidents": 0, "engine": "N/A"})
+        fallback_engine = DETECTOR_DISPLAY_ENGINES.get(det_name, "Operational")
+        info = detector_info.get(det_name, {"alerts": 0, "incidents": 0, "engine": fallback_engine})
+        engine_str = info.get("engine") or fallback_engine
+        if engine_str == "N/A":
+            engine_str = fallback_engine
         with cols2[i]:
             st.markdown(
                 f"""<div class="detector-card">
                     <div class="detector-card-header">{det_name}</div>
                     <div class="detector-card-metric"><strong>{info['alerts']}</strong> alert{'s' if info['alerts'] != 1 else ''}</div>
                     <div class="detector-card-metric"><strong>{info['incidents']}</strong> incident{'s' if info['incidents'] != 1 else ''}</div>
-                    <div class="detector-card-metric">{info['engine']}</div>
+                    <div class="detector-card-metric">{engine_str}</div>
                     <div class="detector-card-status">Operational</div>
                 </div>""",
                 unsafe_allow_html=True,
             )
+
 
 
 def _render_threat_activity(db_path_str: str) -> None:

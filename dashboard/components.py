@@ -21,9 +21,9 @@ def render_header(db_status: bool, db_msg: str, total_alerts: int) -> None:
     header_html = f"""
     <div class="soc-header">
         <div>
-            <div class="soc-header-title">SIH PS-26145 &mdash; OT CYBER THREAT MONITORING CONSOLE</div>
+            <div class="soc-header-title">AKSHI &mdash; OT CYBER THREAT MONITORING CONSOLE</div>
             <div style="font-size: 0.8rem; color: #93C5FD; margin-top: 2px;">
-                Deterministic Hybrid Threat Detection &amp; OT-Aware Alert Fusion
+                AI-Based Detection of Cyber Threats in Unidirectional IP Traffic
             </div>
         </div>
         <div class="soc-header-meta">
@@ -426,7 +426,7 @@ def render_correlated_incidents(correlated_groups: List[Dict[str, Any]]) -> None
 
         st.markdown(
             f"""
-            <div style="background-color: #FFFFFF; border: 1px solid #CBD5E1; border-left: 4px solid #EAB308; border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 0.75rem;">
+            <div class="incident-card" style="background-color: #FFFFFF; border: 1px solid #CBD5E1; border-left: 4px solid #EAB308; border-radius: 4px; padding: 0.85rem 1rem; margin-bottom: 0.75rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                     <div>
                         <strong style="color: #1E3A8A; font-family: monospace;">INCIDENT {cid}</strong>

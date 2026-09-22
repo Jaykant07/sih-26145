@@ -36,78 +36,11 @@ is_online, _, _ = check_db_status(db_path)
 
 st.markdown('<div class="soc-section-title">Threat Intelligence</div>', unsafe_allow_html=True)
 
-# Disclaimer
-st.markdown(
-    """<div style="background-color: #EAF2FF; border: 1px solid #93C5FD; border-radius: 4px; padding: 0.6rem 0.8rem; margin-bottom: 1rem; font-size: 0.8rem; color: #1E40AF;">
-        <strong>Offline intelligence only.</strong> No live external threat-intelligence queries are performed.
-        This is an architectural constraint preserving the project's no-return-path / offline design.
-    </div>""",
-    unsafe_allow_html=True,
-)
-
-col_mode, col_ext = st.columns(2)
-with col_mode:
-    st.markdown(
-        """<div class="intel-card">
-            <div class="intel-label">Mode</div>
-            <div class="intel-value">OFFLINE</div>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-with col_ext:
-    st.markdown(
-        """<div class="intel-card">
-            <div class="intel-label">External Lookup</div>
-            <div class="intel-value">DISABLED</div>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
-
 # Load JA3 blacklist
 blacklist = _load_ja3_blacklist()
 metadata = blacklist.get("snapshot_metadata", {})
 ja3_entries = blacklist.get("ja3", {})
 ja3s_entries = blacklist.get("ja3s", {})
-
-# Snapshot info
-st.markdown("**Offline Intelligence Snapshot**")
-col1, col2, col3, col4 = st.columns(4)
-with col1:
-    st.markdown(
-        f"""<div class="intel-card">
-            <div class="intel-label">Snapshot Status</div>
-            <div class="intel-value">{'LOADED' if blacklist else 'NOT FOUND'}</div>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-with col2:
-    st.markdown(
-        f"""<div class="intel-card">
-            <div class="intel-label">JA3 Entries</div>
-            <div class="intel-value">{len(ja3_entries)}</div>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-with col3:
-    st.markdown(
-        f"""<div class="intel-card">
-            <div class="intel-label">JA3S Entries</div>
-            <div class="intel-value">{len(ja3s_entries)}</div>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-with col4:
-    st.markdown(
-        f"""<div class="intel-card">
-            <div class="intel-label">Last Updated</div>
-            <div class="intel-value">{metadata.get('version', 'N/A')}</div>
-        </div>""",
-        unsafe_allow_html=True,
-    )
-
-st.markdown("<br>", unsafe_allow_html=True)
 
 # JA3 Fingerprint Table
 st.markdown("**JA3 Suspicious Fingerprints**")

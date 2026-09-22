@@ -33,6 +33,7 @@ THREAT_CLASS_LABELS: dict[str, str] = {
     "beaconing": "C2 Beaconing",
     "tls_anomaly": "Encrypted Malware / TLS",
     "exfiltration": "Exfiltration",
+    "anomalous_behavior": "AI Behavioral Anomaly",
 }
 
 db_path = get_active_db_path()

@@ -1,0 +1,103 @@
+{
+  "model": "IsolationForest",
+  "parameters": {
+    "n_estimators": 300,
+    "contamination": "auto",
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "model_version": "isolation-forest-v1",
+  "feature_count": 16,
+  "numerical_features": [
+    "duration",
+    "orig_bytes",
+    "resp_bytes",
+    "orig_pkts",
+    "resp_pkts",
+    "orig_ip_bytes",
+    "resp_ip_bytes",
+    "total_bytes",
+    "total_pkts",
+    "byte_rate",
+    "packet_rate",
+    "byte_ratio",
+    "packet_ratio",
+    "missed_bytes"
+  ],
+  "categorical_features": [
+    "proto",
+    "conn_state"
+  ],
+  "training_rows": 46,
+  "source_experiments": [
+    {
+      "experiment": "BENIGN-002",
+      "path": "data/zeek/benign/benign-002/conn.log",
+      "record_count": 2
+    },
+    {
+      "experiment": "BENIGN-003",
+      "path": "data/zeek/benign/benign-003/conn.log",
+      "record_count": 1
+    },
+    {
+      "experiment": "BENIGN-004",
+      "path": "data/zeek/benign/benign-004/conn.log",
+      "record_count": 20
+    },
+    {
+      "experiment": "BENIGN-005",
+      "path": "data/zeek/benign/benign-005/conn.log",
+      "record_count": 22
+    },
+    {
+      "experiment": "ENC-001",
+      "path": "data/zeek/encrypted/enc-001/conn.log",
+      "record_count": 1
+    }
+  ],
+  "calibration_bridge": {
+    "benign_score_min": -0.14018598253502312,
+    "benign_score_max": 0.29709690839478453,
+    "benign_score_mean": -0.05932710092710414,
+    "benign_score_std": 0.09419539872352978,
+    "formula": "confidence = max(0.0, min(1.0, (raw_score - benign_min) / (benign_max - benign_min)))"
+  },
+  "data_audit": {
+    "nan_counts": {
+      "duration": 0,
+      "orig_bytes": 0,
+      "resp_bytes": 0,
+      "orig_pkts": 0,
+      "resp_pkts": 0,
+      "orig_ip_bytes": 0,
+      "resp_ip_bytes": 0,
+      "total_bytes": 0,
+      "total_pkts": 0,
+      "byte_rate": 0,
+      "packet_rate": 0,
+      "byte_ratio": 0,
+      "packet_ratio": 0,
+      "missed_bytes": 0,
+      "proto": 0,
+      "conn_state": 0
+    },
+    "inf_counts": {
+      "duration": 0,
+      "orig_bytes": 0,
+      "resp_bytes": 0,
+      "orig_pkts": 0,
+      "resp_pkts": 0,
+      "orig_ip_bytes": 0,
+      "resp_ip_bytes": 0,
+      "total_bytes": 0,
+      "total_pkts": 0,
+      "byte_rate": 0,
+      "packet_rate": 0,
+      "byte_ratio": 0,
+      "packet_ratio": 0,
+      "missed_bytes": 0
+    },
+    "duplicate_rows": 0
+  }
+}

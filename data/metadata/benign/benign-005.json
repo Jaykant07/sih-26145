@@ -1,0 +1,35 @@
+{
+  "experiment_id": "BENIGN-005",
+  "traffic_class": "benign",
+  "traffic_type": "normal_dns_baseline",
+  "generator": "custom_python_dns_responder_and_dig",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "destination_port": 53531,
+  "protocol": "UDP",
+  "application_protocol": "DNS",
+  "requested_queries": 22,
+  "captured_packets": 44,
+  "kernel_dropped_packets": 0,
+  "zeek_dns_records": 22,
+  "zeek_conn_records": 22,
+  "zeek_qtypes": {
+    "A": 22
+  },
+  "zeek_rcodes": {
+    "NOERROR": 22
+  },
+  "zeek_conn_states": {
+    "SF": 22
+  },
+  "zeek_missed_bytes": 0,
+  "query_profile": "human_readable_repeated_internal_hostnames",
+  "base_domain": "lab.local",
+  "query_interval_seconds_approx": 0.5,
+  "pcap_file": "data/raw/benign/benign-005-normal-dns.pcap",
+  "pcap_size_bytes": 4902,
+  "label": "benign",
+  "ground_truth": true,
+  "canonical": true,
+  "notes": "Controlled benign DNS baseline generated in the isolated PS-26145 lab. Queries used ordinary human-readable internal hostnames under lab.local, with repeated legitimate names and low-rate periodic requests. DNS traffic used UDP/53531 because the lab's standard DNS ports were unavailable. Zeek's DNS analyzer was explicitly registered for UDP/53531."
+}

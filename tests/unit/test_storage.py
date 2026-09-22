@@ -7,17 +7,22 @@ import sqlite3
 import pytest
 
 from storage.sqlite_store import (
+    delete_pcap_analysis_records,
     get_alert_by_id,
     get_alerts,
     get_asset_summary,
     get_correlated_groups,
     get_kpi_summary,
+    get_pcap_analyses,
+    get_pcap_analysis_by_id,
     get_severity_distribution,
     get_threat_distribution,
     get_timeseries,
     init_db,
     insert_alert,
     insert_alerts,
+    insert_pcap_analysis,
+    update_pcap_analysis,
 )
 
 
@@ -237,3 +242,99 @@ def test_get_asset_summary(temp_db: Path, sample_alerts):
     plc = next((a for a in assets if a["ip"] == "192.168.56.10"), None)
     assert plc is not None
     assert plc["alert_count"] >= 1
+
+
+def test_pcap_analyses_crud(temp_db: Path):
+    """Test full CRUD operations on pcap_analyses table."""
+    record = {
+        "pcap_id": "test-pcap-1234",
+        "filename": "sample.pcap",
+        "file_size_bytes": 1048576,
+        "pcap_format": "libpcap",
+        "upload_timestamp": "2026-09-22T10:00:00Z",
+        "analysis_start_time": "2026-09-22T10:00:01Z",
+        "status": "processing",
+        "artifact_dir": "artifacts/uploads/test-pcap-1234",
+    }
+    pid = insert_pcap_analysis(record, temp_db)
+    assert pid == "test-pcap-1234"
+
+    # Fetch by ID
+    meta = get_pcap_analysis_by_id("test-pcap-1234", temp_db)
+    assert meta is not None
+    assert meta["filename"] == "sample.pcap"
+    assert meta["status"] == "processing"
+
+    # Update record
+    updated = update_pcap_analysis(
+        "test-pcap-1234",
+        {
+            "status": "completed",
+            "analysis_end_time": "2026-09-22T10:00:05Z",
+            "duration_seconds": 4.0,
+            "connections_count": 42,
+            "alerts_count": 5,
+        },
+        temp_db,
+    )
+    assert updated is True
+
+    meta_after = get_pcap_analysis_by_id("test-pcap-1234", temp_db)
+    assert meta_after["status"] == "completed"
+    assert meta_after["connections_count"] == 42
+    assert meta_after["alerts_count"] == 5
+
+    # List all
+    all_pcaps = get_pcap_analyses(temp_db)
+    assert len(all_pcaps) == 1
+    assert all_pcaps[0]["pcap_id"] == "test-pcap-1234"
+
+    # Transactional delete
+    del_res = delete_pcap_analysis_records("test-pcap-1234", temp_db)
+    assert del_res[1] == 1  # 1 pcap_analyses row deleted
+    assert get_pcap_analysis_by_id("test-pcap-1234", temp_db) is None
+
+
+def test_scoped_alert_queries(temp_db: Path, sample_alerts):
+    """Test that canonical_only and pcap_id scoping work as designed."""
+    # sample_alerts has no pcap_id (canonical demo alerts)
+    insert_alerts(sample_alerts, temp_db)
+
+    # Insert a PCAP-scoped alert
+    pcap_alert = {
+        "alert_id": "pcap-scoped-999",
+        "timestamp": "2026-09-22T11:00:00Z",
+        "flow_id": "flow-pcap-1",
+        "threat_class": "dga",
+        "severity": "high",
+        "confidence": 0.90,
+        "source": "10.10.10.10",
+        "destination": "8.8.8.8",
+        "detector": "dga_detector",
+        "model_version": "1.0.0",
+        "schema_version": "1.0.0",
+        "supporting_evidence": {"source_type": "upload"},
+        "pcap_id": "upload-session-xyz",
+    }
+    insert_alert(pcap_alert, temp_db)
+
+    # 1. Canonical-only query (Overview) sees only sample_alerts (3 alerts)
+    canonical_alerts = get_alerts(temp_db, canonical_only=True)
+    assert len(canonical_alerts) == 3
+    assert all(a.get("pcap_id") is None for a in canonical_alerts)
+
+    canonical_kpis = get_kpi_summary(temp_db, canonical_only=True)
+    assert canonical_kpis["total_alerts"] == 3
+
+    # 2. Scoped query (PCAP page) sees only the PCAP alert (1 alert)
+    pcap_alerts = get_alerts(temp_db, pcap_id="upload-session-xyz")
+    assert len(pcap_alerts) == 1
+    assert pcap_alerts[0]["alert_id"] == "pcap-scoped-999"
+
+    pcap_kpis = get_kpi_summary(temp_db, pcap_id="upload-session-xyz")
+    assert pcap_kpis["total_alerts"] == 1
+
+    # 3. All alerts query (unconstrained) sees 4 alerts
+    all_alerts = get_alerts(temp_db)
+    assert len(all_alerts) == 4
+

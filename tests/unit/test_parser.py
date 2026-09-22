@@ -145,3 +145,24 @@ class TestConnRecordParsing:
         p = tmp_path / "empty.log"
         p.write_text("")
         assert list(parse_conn_log(p)) == []
+
+    def test_tsv_zeek_format_parsed(self, tmp_path: Path) -> None:
+        """Standard Zeek tab-delimited conn.log is parsed correctly."""
+        lines = [
+            "#separator \\x09",
+            "#fields\tts\tuid\tid.orig_h\tid.orig_p\tid.resp_h\tid.resp_p\tproto\tservice\tduration\torig_bytes\tresp_bytes\tconn_state\tlocal_orig\tlocal_resp\tmissed_bytes\thistory\torig_pkts\torig_ip_bytes\tresp_pkts\tresp_ip_bytes",
+            "1789640570.35\tCtest123\t192.168.56.102\t33740\t192.168.56.254\t5201\ttcp\t-\t30.39\t1000\t500\tSF\tT\tT\t0\tShADa\t15\t1500\t12\t1200",
+        ]
+        p = _write_log(lines, tmp_path)
+        records = list(parse_conn_log(p))
+        assert len(records) == 1
+        r = records[0]
+        assert r.uid == "Ctest123"
+        assert r.src_ip == "192.168.56.102"
+        assert r.dst_port == 5201
+        assert r.service is None  # '-' converted to None
+        assert r.duration == pytest.approx(30.39)
+        assert r.orig_bytes == 1000
+        assert r.conn_state == "SF"
+        assert r.local_orig is True
+

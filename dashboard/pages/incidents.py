@@ -26,6 +26,7 @@ THREAT_CLASS_LABELS: dict[str, str] = {
     "beaconing": "C2 Beaconing",
     "tls_anomaly": "Encrypted Malware / TLS",
     "exfiltration": "Exfiltration",
+    "anomalous_behavior": "AI Behavioral Anomaly",
 }
 
 
@@ -167,36 +168,39 @@ if not is_online:
     st.warning("Alert database is unavailable.")
     st.stop()
 
-# Sidebar filters for this page
-with st.sidebar:
-    st.markdown('<div class="sidebar-group-label">INCIDENT FILTERS</div>', unsafe_allow_html=True)
+# Compact Filter Bar in Main Content Area
+st.markdown('<div class="soc-section-title">Incidents & Forensics</div>', unsafe_allow_html=True)
 
-    available_severities = ["CRITICAL", "HIGH", "MEDIUM", "LOW"]
-    sev_filter = st.multiselect(
+f_col1, f_col2, f_col3, f_col4 = st.columns([2, 2, 3, 1])
+with f_col1:
+    sev_filter_val = st.selectbox(
         "Severity",
-        options=available_severities,
-        default=[],
-        placeholder="All severities",
-        key="inc_filter_sev",
+        options=["All Severities", "Critical", "High", "Medium", "Low"],
+        index=0,
+        label_visibility="collapsed",
+        key="inc_filter_sev_select",
     )
+    sev_filter = [sev_filter_val.upper()] if sev_filter_val != "All Severities" else []
+with f_col2:
     source_filter = st.text_input(
         "Source IP",
-        placeholder="e.g. 192.168.56.",
+        placeholder="Source IP...",
+        label_visibility="collapsed",
         key="inc_filter_src",
     ).strip()
+with f_col3:
     search_term = st.text_input(
-        "Search",
-        placeholder="CID, IP, threat, detector, evidence...",
+        "Search incidents...",
+        placeholder="Search incidents (ID, IP, threat, detector)...",
+        label_visibility="collapsed",
         key="inc_filter_search",
     ).strip()
-
-    # Reset button when any filter is populated
-    if sev_filter or source_filter or search_term:
-        if st.button("Reset Filters", key="btn_reset_inc_filters", use_container_width=True):
-            st.session_state["inc_filter_sev"] = []
-            st.session_state["inc_filter_src"] = ""
-            st.session_state["inc_filter_search"] = ""
-            st.rerun()
+with f_col4:
+    if st.button("Reset", key="btn_reset_inc_filters", use_container_width=True):
+        st.session_state["inc_filter_sev_select"] = "All Severities"
+        st.session_state["inc_filter_src"] = ""
+        st.session_state["inc_filter_search"] = ""
+        st.rerun()
 
 # Tab layout: Incidents | Alert Stream
 tab_incidents, tab_stream = st.tabs(["Correlated Incidents", "Alert Stream & Forensics"])

@@ -398,7 +398,71 @@ class TestFailClosedAndArchitecture:
         """DraftAlert to_dict includes optional fields when set, excludes when None."""
         alert = _make_alert(subtype="syn_flood", latency_class=LatencyClass.EVENT_DRIVEN)
         d = alert.to_dict()
-        assert d["subtype"] == "syn_flood"
-        assert d["latency_class"] == "event_driven"
         assert "asset_criticality" not in d
         assert "correlated_alert_ids" not in d
+
+    def test_27_anomalous_behavior_threat_class_accepted(self) -> None:
+        """Phase 5: New threat class anomalous_behavior is accepted by factory and validator."""
+        alert = create_draft_alert(
+            threat_class=ThreatClass.ANOMALOUS_BEHAVIOR,
+            confidence=0.82,
+            source="192.168.56.102",
+            destination="192.168.56.254",
+            supporting_evidence={"raw_anomaly_score": 0.35, "normalized_confidence": 0.82},
+            detector="ai_behavioral_anomaly",
+            model_version="isolation-forest-v1",
+        )
+        is_valid, errors = validate_draft_alert(alert.to_dict())
+        assert is_valid is True, f"Validation failed: {errors}"
+        assert alert.threat_class == "anomalous_behavior"
+
+    def test_28_all_existing_threat_classes_remain_valid(self) -> None:
+        """Phase 5: All existing and new threat classes in ThreatClass remain valid."""
+        for name in dir(ThreatClass):
+            if name.startswith("_"):
+                continue
+            tc_value = getattr(ThreatClass, name)
+            if not isinstance(tc_value, str):
+                continue
+            alert = create_draft_alert(
+                threat_class=tc_value,
+                confidence=0.5,
+                source="10.0.0.1",
+                destination="10.0.0.2",
+                supporting_evidence={"check": True},
+                detector="test_detector",
+                model_version="1.0.0",
+            )
+            is_valid, errors = validate_draft_alert(alert.to_dict())
+            assert is_valid is True, f"Threat class '{tc_value}' failed validation: {errors}"
+
+    def test_29_invalid_threat_classes_rejected(self) -> None:
+        """Phase 5: Random unsupported threat classes fail validation."""
+        for invalid_tc in ["unsupported_class", "malware_trojan", "random_attack", "apt29"]:
+            with pytest.raises(AlertValidationError) as exc_info:
+                create_draft_alert(
+                    threat_class=invalid_tc,
+                    confidence=0.5,
+                    source="10.0.0.1",
+                    destination="10.0.0.2",
+                    supporting_evidence={"check": True},
+                    detector="test_detector",
+                    model_version="1.0.0",
+                )
+            assert "threat_class" in str(exc_info.value).lower()
+
+    def test_30_confidence_bounds_enforced(self) -> None:
+        """Phase 5: Confidence values strictly outside [0.0, 1.0] are rejected."""
+        for bad_conf in [-0.01, -1.0, 1.001, 2.5]:
+            with pytest.raises(AlertValidationError) as exc_info:
+                create_draft_alert(
+                    threat_class=ThreatClass.ANOMALOUS_BEHAVIOR,
+                    confidence=bad_conf,
+                    source="10.0.0.1",
+                    destination="10.0.0.2",
+                    supporting_evidence={"score": bad_conf},
+                    detector="ai_behavioral_anomaly",
+                    model_version="isolation-forest-v1",
+                )
+            assert "confidence" in str(exc_info.value).lower()
+

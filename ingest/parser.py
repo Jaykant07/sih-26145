@@ -58,31 +58,31 @@ class ConnRecord:
 
 
 def _safe_optional_float(raw: dict, key: str) -> Optional[float]:
-    """Extract an optional float field, returning None if absent or null."""
+    """Extract an optional float field, returning None if absent, null, or unset."""
     val = raw.get(key)
-    if val is None:
+    if val is None or val == "-" or val == "(empty)":
         return None
     return float(val)
 
 
 def _safe_optional_int(raw: dict, key: str) -> Optional[int]:
-    """Extract an optional int field, returning None if absent or null."""
+    """Extract an optional int field, returning None if absent, null, or unset."""
     val = raw.get(key)
-    if val is None:
+    if val is None or val == "-" or val == "(empty)":
         return None
     return int(val)
 
 
 def _safe_optional_str(raw: dict, key: str) -> Optional[str]:
-    """Extract an optional string field, returning None if absent or null."""
+    """Extract an optional string field, returning None if absent, null, or unset."""
     val = raw.get(key)
-    if val is None:
+    if val is None or val == "-" or val == "(empty)":
         return None
     return str(val)
 
 
 def _parse_record(raw: dict) -> ConnRecord:
-    """Parse a single JSON dict into a ConnRecord.
+    """Parse a single dict into a ConnRecord.
 
     Raises KeyError or ValueError for missing/malformed required fields.
     """
@@ -95,13 +95,13 @@ def _parse_record(raw: dict) -> ConnRecord:
         dst_port=int(raw["id.resp_p"]),
         proto=str(raw.get("proto", "unknown")),
         conn_state=str(raw.get("conn_state", "")),
-        orig_pkts=int(raw.get("orig_pkts", 0)),
-        resp_pkts=int(raw.get("resp_pkts", 0)),
-        orig_ip_bytes=int(raw.get("orig_ip_bytes", 0)),
-        resp_ip_bytes=int(raw.get("resp_ip_bytes", 0)),
-        missed_bytes=int(raw.get("missed_bytes", 0)),
-        local_orig=bool(raw.get("local_orig", False)),
-        local_resp=bool(raw.get("local_resp", False)),
+        orig_pkts=int(raw.get("orig_pkts", 0) or 0),
+        resp_pkts=int(raw.get("resp_pkts", 0) or 0),
+        orig_ip_bytes=int(raw.get("orig_ip_bytes", 0) or 0),
+        resp_ip_bytes=int(raw.get("resp_ip_bytes", 0) or 0),
+        missed_bytes=int(raw.get("missed_bytes", 0) or 0),
+        local_orig=bool(raw.get("local_orig", False) in (True, "T", "true", "True", 1)),
+        local_resp=bool(raw.get("local_resp", False) in (True, "T", "true", "True", 1)),
         duration=_safe_optional_float(raw, "duration"),
         orig_bytes=_safe_optional_int(raw, "orig_bytes"),
         resp_bytes=_safe_optional_int(raw, "resp_bytes"),
@@ -112,7 +112,7 @@ def _parse_record(raw: dict) -> ConnRecord:
 
 def parse_conn_log(path: str | Path) -> Iterator[ConnRecord]:
     """
-    Parse a Zeek conn.log (JSON format, one record per line).
+    Parse a Zeek conn.log (supports both JSON format and standard Zeek TSV format).
 
     Yields ConnRecord objects. Skips malformed lines with a warning log.
 
@@ -120,18 +120,34 @@ def parse_conn_log(path: str | Path) -> Iterator[ConnRecord]:
         path: Path to the Zeek conn.log file.
 
     Yields:
-        ConnRecord for each valid JSON line.
+        ConnRecord for each valid log line.
     """
     path = Path(path)
     line_num = 0
-    with path.open("r", encoding="utf-8") as fh:
+    tsv_fields: list[str] = []
+    with path.open("r", encoding="utf-8", errors="replace") as fh:
         for line in fh:
             line_num += 1
             stripped = line.strip()
-            if not stripped or stripped.startswith("#"):
+            if not stripped:
+                continue
+            if stripped.startswith("#"):
+                if stripped.startswith("#fields\t"):
+                    tsv_fields = stripped.split("\t")[1:]
+                elif stripped.startswith("#fields "):
+                    tsv_fields = stripped.split()[1:]
                 continue
             try:
-                raw = json.loads(stripped)
+                if stripped.startswith("{"):
+                    raw = json.loads(stripped)
+                elif tsv_fields:
+                    parts = stripped.split("\t")
+                    if len(parts) == len(tsv_fields):
+                        raw = {k: None if v == "-" else v for k, v in zip(tsv_fields, parts)}
+                    else:
+                        continue
+                else:
+                    continue
                 yield _parse_record(raw)
             except (json.JSONDecodeError, KeyError, ValueError, TypeError) as exc:
                 logger.warning(

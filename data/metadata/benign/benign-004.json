@@ -1,0 +1,30 @@
+{
+  "experiment_id": "BENIGN-004",
+  "traffic_class": "benign",
+  "traffic_type": "repeated_short_tcp_sessions",
+  "generator": "iperf3",
+  "source_ip": "192.168.56.102",
+  "destination_ip": "192.168.56.254",
+  "destination_port": 5201,
+  "protocol": "TCP",
+  "requested_sessions": 10,
+  "observed_zeek_connections": 20,
+  "requested_session_duration_seconds": 2,
+  "observed_duration_seconds": {
+    "minimum": 2.274790048599243,
+    "maximum": 3.5874991416931152
+  },
+  "zeek_states": {
+    "SF": 10,
+    "RSTR": 10
+  },
+  "captured_packets": 4587,
+  "kernel_dropped_packets": 0,
+  "zeek_missed_bytes": 0,
+  "pcap_file": "data/raw/benign/benign-004-short-tcp.pcap",
+  "pcap_size_bytes": 10562699,
+  "label": "benign",
+  "ground_truth": true,
+  "canonical": true,
+  "notes": "Controlled benign repeated short TCP sessions generated with iperf3 in the isolated PS-26145 lab. Ten client invocations produced twenty Zeek connection records due to the resulting TCP control/data connection behavior. All observed connections used the same destination host and port. SF and RSTR states are retained as observed and are not independently considered malicious."
+}

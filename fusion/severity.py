@@ -38,6 +38,7 @@ BASE_SEVERITY_MAP: dict[str, str] = {
     ThreatClass.DDOS: Severity.HIGH,
     ThreatClass.DNS_TUNNEL: Severity.HIGH,
     ThreatClass.EXFILTRATION: Severity.HIGH,
+    ThreatClass.ANOMALOUS_BEHAVIOR: Severity.MEDIUM,
 }
 
 

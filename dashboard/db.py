@@ -11,6 +11,8 @@ import streamlit as st
 
 from storage.sqlite_store import (
     DEFAULT_DB_PATH,
+    count_alerts,
+    delete_pcap_analysis_records,
     get_alert_by_id,
     get_alerts,
     get_asset_summary,
@@ -18,6 +20,8 @@ from storage.sqlite_store import (
     get_correlated_vs_uncorrelated,
     get_detector_counts,
     get_kpi_summary,
+    get_pcap_analyses,
+    get_pcap_analysis_by_id,
     get_severity_distribution,
     get_threat_distribution,
     get_timeseries,
@@ -41,7 +45,7 @@ def check_db_status(db_path: Optional[Path] = None) -> Tuple[bool, str, int]:
         return False, f"Database file not found: {path}", 0
 
     try:
-        kpis = get_kpi_summary(path)
+        kpis = get_kpi_summary(path, canonical_only=True)
         total = kpis.get("total_alerts", 0)
         return True, "Online", total
     except Exception as e:
@@ -49,10 +53,14 @@ def check_db_status(db_path: Optional[Path] = None) -> Tuple[bool, str, int]:
 
 
 @st.cache_data(ttl=3)
-def fetch_kpis(db_path_str: str) -> Dict[str, Any]:
-    """Fetch KPI summary counters."""
+def fetch_kpis(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Fetch KPI summary counters, defaulting to canonical baseline for Overview."""
     try:
-        return get_kpi_summary(Path(db_path_str))
+        return get_kpi_summary(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return {
             "total_alerts": 0,
@@ -81,6 +89,8 @@ def fetch_alerts(
     start_time: Optional[str] = None,
     end_time: Optional[str] = None,
     search_term: Optional[str] = None,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Fetch filtered list of alerts."""
     try:
@@ -96,6 +106,8 @@ def fetch_alerts(
             start_time=start_time,
             end_time=end_time,
             search_term=search_term,
+            canonical_only=canonical_only,
+            pcap_id=pcap_id,
         )
     except Exception:
         return []
@@ -111,28 +123,40 @@ def fetch_alert_detail(db_path_str: str, alert_id: str) -> Optional[Dict[str, An
 
 
 @st.cache_data(ttl=3)
-def fetch_threat_distribution(db_path_str: str) -> List[Dict[str, Any]]:
+def fetch_threat_distribution(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch count of alerts per threat class."""
     try:
-        return get_threat_distribution(Path(db_path_str))
+        return get_threat_distribution(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return []
 
 
 @st.cache_data(ttl=3)
-def fetch_severity_distribution(db_path_str: str) -> List[Dict[str, Any]]:
+def fetch_severity_distribution(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch count of alerts per severity level."""
     try:
-        return get_severity_distribution(Path(db_path_str))
+        return get_severity_distribution(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return []
 
 
 @st.cache_data(ttl=3)
-def fetch_timeseries(db_path_str: str) -> List[Dict[str, Any]]:
+def fetch_timeseries(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch threat activity timeline grouped by threat class."""
     try:
-        return get_timeseries(Path(db_path_str))
+        return get_timeseries(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return []
 
@@ -142,6 +166,8 @@ def fetch_binned_timeseries(
     db_path_str: str,
     bin_minutes: int = 5,
     threat_filter: Optional[Tuple[str, ...]] = None,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """Fetch continuous time-bucketed alert activity for time-series charts.
     
@@ -163,7 +189,7 @@ def fetch_binned_timeseries(
     }
 
     try:
-        alerts = get_alerts(Path(db_path_str), limit=1000)
+        alerts = get_alerts(Path(db_path_str), limit=1000, canonical_only=canonical_only, pcap_id=pcap_id)
     except Exception:
         return []
 
@@ -231,44 +257,136 @@ def fetch_binned_timeseries(
 
 
 @st.cache_data(ttl=3)
-def fetch_correlated_groups(db_path_str: str) -> List[Dict[str, Any]]:
+def fetch_correlated_groups(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch multi-stage correlated attack incidents."""
     try:
-        return get_correlated_groups(Path(db_path_str))
+        return get_correlated_groups(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return []
 
 
 @st.cache_data(ttl=3)
-def fetch_asset_summary(db_path_str: str) -> List[Dict[str, Any]]:
+def fetch_asset_summary(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch asset inventory with alert counts."""
     try:
-        return get_asset_summary(Path(db_path_str))
+        return get_asset_summary(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return []
 
 
 @st.cache_data(ttl=3)
-def fetch_detector_counts(db_path_str: str) -> List[Dict[str, Any]]:
+def fetch_detector_counts(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch alert and incident counts per detector/threat class."""
     try:
-        return get_detector_counts(Path(db_path_str))
+        return get_detector_counts(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return []
 
 
 @st.cache_data(ttl=3)
-def fetch_correlated_vs_uncorrelated(db_path_str: str) -> Dict[str, int]:
+def fetch_correlated_vs_uncorrelated(
+    db_path_str: str,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> Dict[str, int]:
     """Fetch correlated vs uncorrelated alert counts."""
     try:
-        return get_correlated_vs_uncorrelated(Path(db_path_str))
+        return get_correlated_vs_uncorrelated(Path(db_path_str), pcap_id=pcap_id, canonical_only=canonical_only)
     except Exception:
         return {"correlated": 0, "uncorrelated": 0}
 
 
-def fetch_recent_alerts(db_path_str: str, limit: int = 10) -> List[Dict[str, Any]]:
+def fetch_recent_alerts(
+    db_path_str: str,
+    limit: int = 10,
+    canonical_only: bool = True,
+    pcap_id: Optional[str] = None,
+) -> List[Dict[str, Any]]:
     """Fetch most recent alerts (uncached for freshness)."""
     try:
-        return get_alerts(Path(db_path_str), limit=limit, offset=0)
+        return get_alerts(Path(db_path_str), limit=limit, offset=0, canonical_only=canonical_only, pcap_id=pcap_id)
     except Exception:
         return []
+
+
+# =====================================================================
+# PCAP ANALYSIS SPECIFIC DATA FETCHERS
+# =====================================================================
+
+@st.cache_data(ttl=2)
+def fetch_pcap_analyses(db_path_str: str) -> List[Dict[str, Any]]:
+    """Fetch all PCAP analysis records."""
+    try:
+        return get_pcap_analyses(Path(db_path_str))
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=2)
+def fetch_pcap_analysis(db_path_str: str, pcap_id: str) -> Optional[Dict[str, Any]]:
+    """Fetch details for a single PCAP analysis record."""
+    try:
+        return get_pcap_analysis_by_id(pcap_id, Path(db_path_str))
+    except Exception:
+        return None
+
+
+@st.cache_data(ttl=2)
+def fetch_pcap_alerts(
+    db_path_str: str,
+    pcap_id: str,
+    limit: int = 50,
+    offset: int = 0,
+    severity: Optional[str] = None,
+    threat_class: Optional[str] = None,
+    search_term: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """Fetch alerts strictly scoped to a specific PCAP ID."""
+    try:
+        return get_alerts(
+            db_path=Path(db_path_str),
+            limit=limit,
+            offset=offset,
+            pcap_id=pcap_id,
+            canonical_only=False,
+            severity=severity,
+            threat_class=threat_class,
+            search_term=search_term,
+        )
+    except Exception:
+        return []
+
+
+@st.cache_data(ttl=2)
+def fetch_pcap_alerts_count(
+    db_path_str: str,
+    pcap_id: str,
+    severity: Optional[str] = None,
+    threat_class: Optional[str] = None,
+    search_term: Optional[str] = None,
+) -> int:
+    """Fetch total count of alerts matching filters strictly scoped to a specific PCAP ID."""
+    try:
+        return count_alerts(
+            db_path=Path(db_path_str),
+            pcap_id=pcap_id,
+            canonical_only=False,
+            severity=severity,
+            threat_class=threat_class,
+            search_term=search_term,
+        )
+    except Exception:
+        return 0
+
