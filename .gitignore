@@ -69,3 +69,4 @@ venv/
 # OS/editor
 .DS_Store
 .vscode/
+rita/test_data/
